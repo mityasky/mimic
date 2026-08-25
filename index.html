@@ -13,14 +13,14 @@
   <meta name="description" data-i18n="pageDescription" content="Бесплатный онлайн-тренажёр для обучения распознаванию эмоций. Помогает детям с аутизмом (РАС) развивать эмоциональный интеллект через игру с камерой, A free online emotion recognition training tool. Helps children with autism (ASD) develop emotional intelligence through camera play.">
   <meta name="keywords" content="аутизм, РАС, эмоции, тренажёр, распознавание лиц, дети, развитие, мимика, обучение, Autism, ASD, emotions, simulator, face recognition, children, development, facial expressions, learning">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://mityasky.github.io/mimic/">
+  <link rel="canonical" href="https://mimic-trainer.mityasky.workers.dev/">
   
     <!-- Open Graph (для красивых превью в соцсетях) -->
   <meta property="og:title" content="МИМИК — Тренажёр эмоций">
   <meta property="og:description" content="Учимся распознавать эмоции через игру. Бесплатно, без регистрации, в браузере.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://mityasky.github.io/mimic/">
-  <meta property="og:image" content="https://mityasky.github.io/mimic/og-image.jpg">
+  <meta property="og:url" content="https://mimic-trainer.mityasky.workers.dev/">
+  <meta property="og:image" content="https://mimic-trainer.mityasky.workers.dev/og-image.jpg">
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="./logo.svg">
@@ -267,7 +267,7 @@
   <button class="menu-item" data-panel="news" data-i18n="menuNews">Новости</button>
   <button class="menu-item" data-panel="science" data-i18n="menuScience">Наука</button>
   <button class="menu-item" id="menu-feedback" data-i18n="menuContact">Контакт</button>
-<button class="menu-item" id="menu-reviews" data-i18n="menuReviews">Отзывы</button>
+  <!-- <button class="menu-item" id="menu-reviews" data-i18n="menuReviews">Отзывы</button>-->
   <button class="menu-item" id="menu-donate" data-i18n="menuSupport">Поддержать</button>
 </div>
   <div class="app-header-center">
@@ -801,18 +801,18 @@
   </div>
 </div>
 
-<!-- ===== МОДАЛЬНОЕ ОКНО ОТЗЫВОВ ===== -->
+<!-- ===== МОДАЛЬНОЕ ОКНО ОТЗЫВОВ ===== 
 <div id="reviews-modal" class="modal-overlay">
   <div class="modal-content reviews-modal">
     <button class="modal-close" aria-label="Закрыть">&times;</button>
     
-    <!-- ФИКСИРОВАННЫЙ ХЕДЕР (не прокручивается) -->
+
     <div class="reviews-header" style="flex-shrink: 0;">
       <h2 data-i18n="reviewsTitle">💬 Отзывы и предложения</h2>
       <p class="reviews-desc" data-i18n="reviewsDesc">Поделитесь своим опытом использования тренажёра. Ваше мнение помогает проекту расти!</p>
     </div>
     
-    <!-- ПРОКРУЧИВАЕМЫЙ КОНТЕНТ (виджет) -->
+
     <div id="cusdis_thread"
       data-host="https://cusdis.com"
       data-app-id="f4323905-ae54-4738-a431-3d4a6f1f2e82"
@@ -824,7 +824,8 @@
     
     <script async src="https://cusdis.com/js/cusdis.es.js"></script>
   </div>
-</div>
+</div>-->
+
 <!-- ===== МОДАЛЬНОЕ ОКНО ДУЭТ ===== -->
 <div id="duel-modal" class="modal-overlay">
   <div class="duel-content">
