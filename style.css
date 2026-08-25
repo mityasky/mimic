@@ -5352,3 +5352,32 @@ body.sensory-friendly .diary-svg-icon {
   background: rgba(245, 158, 11, 0.15);
   border-color: rgba(245, 158, 11, 0.3);
 }
+
+/* ===== МАТРИЦА ОШИБОК ПОРТРЕТА ===== */
+.error-matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 10px;
+    min-width: 500px;
+}
+.error-matrix-table th, 
+.error-matrix-table td {
+    padding: 8px;
+    text-align: center;
+    border: 1px solid var(--border);
+}
+.error-matrix-table th {
+    background: var(--bg);
+    font-weight: 600;
+    color: var(--text);
+}
+.matrix-row-header {
+    text-align: left !important;
+    font-weight: 600;
+    background: var(--bg);
+}
+@media (max-width: 600px) {
+    .error-matrix-table { font-size: 11px; }
+    .error-matrix-table th, .error-matrix-table td { padding: 4px; }
+}
