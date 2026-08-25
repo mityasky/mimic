@@ -865,6 +865,12 @@ function giveFeedback(isCorrect, detected) {
     feedback.className = 'feedback incorrect';
 	ProgressModule.trackIncorrect();
     AdvancedStatsModule.recordFailure(emotionKey);
+	
+		        // Сохраняем ошибку для Матрицы портрета
+        const errors = JSON.parse(localStorage.getItem('mimic_errors') || '[]');
+        errors.push({ target: emotionKey, shown: detected, time: Date.now() });
+        if (errors.length > 500) errors.shift(); // Храним не более 500 последних
+        localStorage.setItem('mimic_errors', JSON.stringify(errors));
   }
 }
 
@@ -1621,6 +1627,53 @@ readArticle: 'Читать статью →',
 	
 		    confirmResetRecord: 'Сбросить рекорд?',
     recordReset: '🗑️ Рекорд сброшен!',
+	
+		// Портрет - заголовки
+portraitTitle: 'Формирование портрета',
+portraitProgressTitle: 'Динамика прогресса (Валидные сессии)',
+portraitProgressDesc: 'Тренд точности по последним тренировкам длительностью >10 мин.',
+portraitMatrixTitle: 'Матрица ошибок (Паттерны восприятия)',
+portraitMatrixDesc: 'Какие эмоции путаются чаще всего. Красным выделены системные ошибки.',
+portraitReportTitle: 'Заключение',
+
+// Портрет - статус готовности
+portraitNeedMore: 'Для формирования комплексного эмоционального профиля необходимо накопить опыт.',
+portraitProgressLabel: 'Прогресс:',
+portraitSessionsOf: 'из',
+portraitValidSessions: 'полноценных тренировок (≥10 мин).',
+portraitTotalSessions: 'Всего сессий:',
+portraitContinueTraining: 'Продолжайте тренировки, и здесь появится график прогресса, матрица ошибок и заключение для специалиста.',
+
+// Портрет - график тренда
+portraitChartAccuracy: 'Точность (%)',
+portraitChartSession: 'Номер сессии',
+
+// Портрет - матрица ошибок
+portraitNoErrors: 'Ошибок не зафиксировано. Отличный результат!',
+portraitMatrixHeader: 'Цель ↓ / Показал →',
+portraitEmotionHappy: 'Радость',
+portraitEmotionSad: 'Грусть',
+portraitEmotionAngry: 'Злость',
+portraitEmotionSurprised: 'Удивление',
+portraitEmotionFearful: 'Страх',
+portraitEmotionDisgusted: 'Отвращение',
+
+// Портрет - отчет
+portraitReportIntro: 'Анализ динамики показывает',
+portraitTrendImproving: 'стабильный прогресс',
+portraitTrendDeclining: 'снижение результатов',
+portraitTrendStable: 'стабильные результаты без выраженной динамики',
+portraitTrendPercentUp: '(рост точности на',
+portraitTrendPercentDown: '(падение на',
+portraitTrendPeriod: 'за анализированный период)',
+portraitInEmotionalIntelligence: 'в освоении эмоционального интеллекта.',
+portraitFatigueDetected: 'Обнаружен признак когнитивного утомления: точность в длинных сессиях',
+portraitFatigueShort: 'значительно ниже, чем в коротких подходах',
+portraitFatigueRecommendation: 'Рекомендуется дробить тренировки на интервалы по 8-10 минут с перерывами.',
+portraitNoFatigue: 'Пользователь демонстрирует высокую резистентность к утомлению, сохраняя концентрацию даже в длительных сессиях.',
+portraitDataVolume: 'Общий объем данных:',
+portraitDataSessions: 'сессий, из них',
+portraitDataValid: 'полноценных тренировок (более 10 мин).',
 
     // Боковые панели
     btnHelp: "Помощь",
@@ -1991,6 +2044,53 @@ readArticle: 'Read Article →',
 	
 		    confirmResetRecord: 'Reset high score?',
     recordReset: '🗑️ High score reset!',
+	
+		// Portrait - headers
+portraitTitle: 'Portrait Formation',
+portraitProgressTitle: 'Progress Dynamics (Valid Sessions)',
+portraitProgressDesc: 'Accuracy trend for the last training sessions longer than 10 min.',
+portraitMatrixTitle: 'Error Matrix (Perception Patterns)',
+portraitMatrixDesc: 'Which emotions are confused most often. Systematic errors are highlighted in red.',
+portraitReportTitle: 'Report',
+
+// Portrait - readiness status
+portraitNeedMore: 'To form a comprehensive emotional profile, experience needs to be accumulated.',
+portraitProgressLabel: 'Progress:',
+portraitSessionsOf: 'of',
+portraitValidSessions: 'complete training sessions (≥10 min).',
+portraitTotalSessions: 'Total sessions:',
+portraitContinueTraining: 'Continue training, and a progress chart, error matrix, and specialist report will appear here.',
+
+// Portrait - trend chart
+portraitChartAccuracy: 'Accuracy (%)',
+portraitChartSession: 'Session Number',
+
+// Portrait - error matrix
+portraitNoErrors: 'No errors recorded. Excellent result!',
+portraitMatrixHeader: 'Target ↓ / Shown →',
+portraitEmotionHappy: 'Happiness',
+portraitEmotionSad: 'Sadness',
+portraitEmotionAngry: 'Anger',
+portraitEmotionSurprised: 'Surprise',
+portraitEmotionFearful: 'Fear',
+portraitEmotionDisgusted: 'Disgust',
+
+// Portrait - report
+portraitReportIntro: 'Dynamics analysis shows',
+portraitTrendImproving: 'stable progress',
+portraitTrendDeclining: 'declining results',
+portraitTrendStable: 'stable results without significant dynamics',
+portraitTrendPercentUp: '(accuracy increase of',
+portraitTrendPercentDown: '(decrease of',
+portraitTrendPeriod: 'over the analyzed period)',
+portraitInEmotionalIntelligence: 'in emotional intelligence acquisition.',
+portraitFatigueDetected: 'Signs of cognitive fatigue detected: accuracy in long sessions',
+portraitFatigueShort: 'is significantly lower than in short approaches',
+portraitFatigueRecommendation: 'It is recommended to break training into 8-10 minute intervals with breaks.',
+portraitNoFatigue: 'The user demonstrates high resistance to fatigue, maintaining concentration even in long sessions.',
+portraitDataVolume: 'Total data volume:',
+portraitDataSessions: 'sessions, of which',
+portraitDataValid: 'are complete training sessions (more than 10 min).',
 
     btnHelp: "Help",
     btnPrivacy: "Privacy",
@@ -5874,7 +5974,11 @@ const AdvancedStatsModule = (() => {
     setTimeout(() => {
       renderRadarChart();
       renderStatsTable();
-    }, 150);
+      // Вызов модуля цифрового портрета
+      if (typeof EmotionalPortraitModule !== 'undefined') {
+          EmotionalPortraitModule.render();
+      }
+    }, 100);
   }
 
   function closeModal() {
@@ -6257,3 +6361,264 @@ function updateDiaryTranslations() {
     }
   });
 }
+
+// ===== МОДУЛЬ: ЦИФРОВОЙ ЭМОЦИОНАЛЬНЫЙ ПОРТРЕТ =====
+const EmotionalPortraitModule = (() => {
+    const MIN_SESSIONS = 10;
+    const MIN_DURATION_SEC = 60; // 600 (10 минут); 60 (1 минута) для теста
+
+    function getData() {
+        const history = JSON.parse(localStorage.getItem('mimic_progress_history') || '[]');
+        const errors = JSON.parse(localStorage.getItem('mimic_errors') || '[]');
+        return { history, errors };
+    }
+
+    function checkReadiness() {
+        const { history } = getData();
+        const validSessions = history.filter(s => (s.time || 0) >= MIN_DURATION_SEC);
+        return {
+            isReady: validSessions.length >= MIN_SESSIONS,
+            validCount: validSessions.length,
+            totalCount: history.length
+        };
+    }
+
+    function analyzeTrend(sessions) {
+        if (sessions.length < 3) return { trend: 'stable', percent: 0 };
+        const n = sessions.length;
+        let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+        sessions.forEach((s, i) => {
+            sumX += i; sumY += s.accuracy;
+            sumXY += i * s.accuracy; sumXX += i * i;
+        });
+        const denominator = (n * sumXX - sumX * sumX);
+        if (denominator === 0) return { trend: 'stable', percent: 0 };
+       
+	   const slope = (n * sumXY - sumX * sumY) / denominator;
+        const avgY = sumY / n;
+        const periodChange = slope * (n - 1);
+const percentChange = avgY > 0
+    ? (periodChange / avgY) * 100
+    : 0;
+
+        if (percentChange > 5) return { trend: 'improving', percent: Math.round(percentChange) };
+        if (percentChange < -5) return { trend: 'declining', percent: Math.round(Math.abs(percentChange)) };
+        return { trend: 'stable', percent: 0 };
+    }
+
+function analyzeFatigue(history) {
+    const longSessions = history.filter(s => (s.time || 0) >= MIN_DURATION_SEC); // Используем константу
+    
+    if (longSessions.length === 0) {
+        return { isFatigued: false, shortAccuracy: '0.0', longAccuracy: '0.0' };
+    }
+
+    // Для тестового режима (MIN_DURATION_SEC = 60) сравниваем с сессиями < 60 сек
+    // Для продакшена (MIN_DURATION_SEC = 600) сравниваем с сессиями 60-600 сек
+    const shortSessions = history.filter(s => {
+        const time = s.time || 0;
+        if (MIN_DURATION_SEC <= 60) {
+            // Тестовый режим: короткие сессии < MIN_DURATION_SEC
+            return time < MIN_DURATION_SEC;
+        } else {
+            // Продакшен: короткие сессии 60-600 сек
+            return time < MIN_DURATION_SEC && time > 60;
+        }
+    });
+    
+    const avgAccuracyShort = shortSessions.length 
+        ? shortSessions.reduce((sum, s) => sum + (s.accuracy || 0), 0) / shortSessions.length 
+        : 0;
+    
+    const avgAccuracyLong = longSessions.length 
+        ? longSessions.reduce((sum, s) => sum + (s.accuracy || 0), 0) / longSessions.length 
+        : 0;
+
+    // Утомление, если точность в длинных сессиях падает на 15%+
+    const isFatigued = avgAccuracyLong < (avgAccuracyShort * 0.85) 
+                    && longSessions.length > 0 
+                    && avgAccuracyShort > 0;
+
+    return { 
+        isFatigued, 
+        shortAccuracy: avgAccuracyShort.toFixed(1), 
+        longAccuracy: avgAccuracyLong.toFixed(1) 
+    };
+}
+
+function generateReport(trend, fatigue, readiness) {
+    const t = translations[currentLang];
+    
+    let trendText;
+    if (trend.trend === 'improving') {
+        trendText = `${t.portraitTrendImproving} ${t.portraitTrendPercentUp} ${trend.percent}% ${t.portraitTrendPeriod}`;
+    } else if (trend.trend === 'declining') {
+        trendText = `${t.portraitTrendDeclining} ${t.portraitTrendPercentDown} ${trend.percent}% ${t.portraitTrendPeriod}`;
+    } else {
+        trendText = t.portraitTrendStable;
+    }
+
+    let report = `${t.portraitReportIntro} ${trendText} ${t.portraitInEmotionalIntelligence} `;
+    
+    if (fatigue.isFatigued) {
+        report += `${t.portraitFatigueDetected} (${fatigue.longAccuracy}%) ${t.portraitFatigueShort} (${fatigue.shortAccuracy}%). ${t.portraitFatigueRecommendation}`;
+    } else {
+        report += t.portraitNoFatigue;
+    }
+
+    report += `\n\n${t.portraitDataVolume} ${readiness.totalCount} ${t.portraitDataSessions} ${readiness.validCount} ${t.portraitDataValid}`;
+    
+    return report;
+}
+
+function renderTrendChart(sessions) {
+    const ctx = document.getElementById('portrait-trend-chart');
+    if (!ctx) return;
+
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) existingChart.destroy();
+
+    const t = translations[currentLang];
+    const labels = sessions.map((s, i) => `#${i + 1}`);
+    const data = sessions.map(s => s.accuracy);
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: t.portraitChartAccuracy,
+                data: data,
+                borderColor: '#4361ee',
+                backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#4361ee'
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: { 
+                y: { beginAtZero: true, max: 100 }, 
+                x: { title: { display: true, text: t.portraitChartSession } } 
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+function renderErrorMatrix(errors) {
+    const container = document.getElementById('error-matrix-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const t = translations[currentLang];
+
+    if (errors.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:var(--text-secondary);">${t.portraitNoErrors}</p>`;
+        return;
+    }
+
+    const emotions = ['happy', 'sad', 'angry', 'surprised', 'fearful', 'disgusted'];
+    const names = { 
+        happy: t.portraitEmotionHappy, 
+        sad: t.portraitEmotionSad, 
+        angry: t.portraitEmotionAngry, 
+        surprised: t.portraitEmotionSurprised, 
+        fearful: t.portraitEmotionFearful, 
+        disgusted: t.portraitEmotionDisgusted 
+    };
+    
+    const matrix = {};
+    emotions.forEach(target => { 
+        matrix[target] = {}; 
+        emotions.forEach(shown => matrix[target][shown] = 0); 
+    });
+
+    errors.forEach(e => {
+        if (matrix[e.target] && matrix[e.target][e.shown] !== undefined) {
+            matrix[e.target][e.shown]++;
+        }
+    });
+
+    let html = `<table class="error-matrix-table"><thead><tr><th>${t.portraitMatrixHeader}</th>`;
+    emotions.forEach(e => html += `<th>${names[e]}</th>`);
+    html += '</tr></thead><tbody>';
+
+    emotions.forEach(target => {
+        html += `<tr><td class="matrix-row-header">${names[target]}</td>`;
+        emotions.forEach(shown => {
+            const count = matrix[target][shown];
+            const isTarget = target === shown;
+            
+            // 🆕 ОДИН ФИКСИРОВАННЫЙ КРАСНЫЙ ЦВЕТ для всех ошибок
+            let style = '';
+            if (count > 0 && !isTarget) {
+                style = `background: rgba(231, 76, 60, 0.6); color: white; font-weight: bold;`;
+            }
+            
+            html += `<td style="${style}">${count > 0 ? count : '-'}</td>`;
+        });
+        html += '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+    function render() {
+        const readiness = checkReadiness();
+        const readinessBlock = document.getElementById('portrait-readiness-block');
+        const contentBlock = document.getElementById('portrait-content-block');
+        if (!readinessBlock || !contentBlock) return;
+		
+		// Обновляем переводы в заголовках
+if (typeof translatePage === 'function') {
+    const contentBlock = document.getElementById('portrait-content-block');
+    if (contentBlock) {
+        contentBlock.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[currentLang]?.[key]) {
+                el.textContent = translations[currentLang][key];
+            }
+        });
+    }
+}
+
+if (!readiness.isReady) {
+    readinessBlock.style.display = 'block';
+    contentBlock.style.display = 'none';
+    const t = translations[currentLang];
+    readinessBlock.innerHTML = `
+        <h3>${t.portraitTitle}</h3>
+        <p>${t.portraitNeedMore}</p>
+        <div class="progress-info">
+            <strong>${t.portraitProgressLabel}</strong> ${readiness.validCount} ${t.portraitSessionsOf} ${MIN_SESSIONS} ${t.portraitValidSessions}<br>
+            <strong>${t.portraitTotalSessions}</strong> ${readiness.totalCount}.
+        </div>
+        <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: 10px;">
+            ${t.portraitContinueTraining}
+        </p>
+    `;
+    return;
+}
+
+        readinessBlock.style.display = 'none';
+        contentBlock.style.display = 'block';
+
+        const { history, errors } = getData();
+        
+        const validSessions = history.filter(s => (s.time || 0) >= MIN_DURATION_SEC)
+            .sort((a, b) => new Date(a.date || Date.now()).getTime() - new Date(b.date || Date.now()).getTime());
+        
+        const last15Sessions = validSessions.slice(-15);
+
+        const trend = analyzeTrend(last15Sessions);
+        const fatigue = analyzeFatigue(history);
+        const report = generateReport(trend, fatigue, readiness);
+
+        document.getElementById('psychologist-report').innerText = report;
+        renderTrendChart(last15Sessions);
+        renderErrorMatrix(errors);
+    }
+
+    return { render, checkReadiness };
+})();
+
