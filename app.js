@@ -1350,7 +1350,7 @@ burgerMenuTitle: 'Меню',
 logoTooltip: 'Нажми на меня',
 	
 	advancedStatsBtn: 'Расширенная статистика',
-advancedStatsTitle: 'Расширенная статистика эмоций',
+advancedStatsTitle: 'Цифровой эмоциональный портрет',
 emotionProfileTitle: 'Профиль эмоций',
 emotionProfileDesc: 'Точность и скорость реакции по каждой эмоции',
 legendAccuracy: 'Точность (%)',
@@ -1493,6 +1493,7 @@ newsItem10: '23.07.2026: Добавлена расширенная статис�
 newsItem11: '24.07.2026: Добавлен режим снижения сенсорной нагрузки в заголовке главной страницы. При включении данного режима выключаются все отвлекающие элеменnы - анимации и звук, позволяя лучше сосредоточиться на задаче, если это необходимо',
 newsItem12: '01.08.2026: Добавлен новый эмоциональный дневник в разделе Истории тренировок. После каждого занятия в режиме тренировки можно оставить обратную связь о своём настроении. Добавлен Демо-режим для демонстрации распознавания эмоций в реальном времени в раздел меню Помощь. Эмоциональный аватар и динамические фоны остаются активны, но отключаются игровой режим и система баллов. Сделаны мелкие улучшения интерфейса и добавлен таймер тренировки',
 newsItem13: '16.08.2026: На индикаторе лица в режиме тренировки добавлен новый индикатор текущего состояния внимания и сонливости (тестовый запуск и отладка нового алгоритма). Сделаны оптимизации интерфейса и повышена производительность',
+newsItem14: '25.08.2026: Обновлён модуль расширенной статистики в разделе Истории тренировок, в котором отображается комплексный, цифровой эмоциональный портрет. Для вычисления портрета необходимо набрать не менее 10 тренировок по 10 минут',
 newsPlanned: 'В разработке',
 newsPlanned1: 'Новые игровые режимы и улучшения уже имеющихся функций',
 newsPlanned2: 'Создание цифрового эмоционального портрета',
@@ -1767,7 +1768,7 @@ burgerMenuTitle: 'Menu',
 logoTooltip: 'Click on me',
 	
 	advancedStatsBtn: 'Advanced Statistics',
-advancedStatsTitle: 'Advanced Emotion Statistics',
+advancedStatsTitle: 'Digital emotional portrait',
 emotionProfileTitle: 'Emotion Profile',
 emotionProfileDesc: 'Accuracy and reaction speed per emotion',
 legendAccuracy: 'Accuracy (%)',
@@ -1911,6 +1912,7 @@ newsItem10: 'July 23, 2026: Expanded statistics added to the Training History se
 newsItem11: 'July 24, 2026: A Sensory-Friendly mode has been added to the main page header. Enabling this mode turns off all distracting elements such as animations and sound—allowing for better focus on the task at hand when needed',
 newsItem12: 'August 01, 2026: A new mood tracker has been added to the Training History section. After each training session, you can provide feedback on your mood. A new Demo mode to showcase real-time emotion recognition in the Help section was added. The emotional avatar and dynamic backgrounds remain active, but the game mode and scoring system are disabled. Minor interface improvements were made, and a training timer was added',
 newsItem13: 'August 16, 2026: A new indicator showing the current state of attention and drowsiness has been added to the face display in training mode (test run and debugging of the new algorithm). Interface optimizations have been implemented, and performance has been improved',
+newsItem14: 'August 25, 2026: The advanced statistics module in the Training History section has been updated, displaying a comprehensive, digital emotional profile. To calculate the profile, you need to log at least 10 10-minute trainings',
 newsPlanned: 'In Development',
 newsPlanned1: 'New game modes and improvements to existing features',
 newsPlanned2: 'Digital emotional portrait creation',
@@ -6365,7 +6367,7 @@ function updateDiaryTranslations() {
 // ===== МОДУЛЬ: ЦИФРОВОЙ ЭМОЦИОНАЛЬНЫЙ ПОРТРЕТ =====
 const EmotionalPortraitModule = (() => {
     const MIN_SESSIONS = 10;
-    const MIN_DURATION_SEC = 600; // 600 (10 минут); 60 (1 минута) для теста
+    const MIN_DURATION_SEC = 60; // 600 (10 минут); 60 (1 минута) для теста
 
     function getData() {
         const history = JSON.parse(localStorage.getItem('mimic_progress_history') || '[]');
