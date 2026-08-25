@@ -2617,7 +2617,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// ===== МОДАЛЬНОЕ ОКНО ОТЗЫВОВ (CUSDIS) =====
+/* // ===== МОДАЛЬНОЕ ОКНО ОТЗЫВОВ (CUSDIS) =====
 document.addEventListener('DOMContentLoaded', () => {
   const reviewsBtn = document.getElementById('reviews-btn');
   const reviewsModal = document.getElementById('reviews-modal');
@@ -2654,7 +2654,7 @@ function syncCusdisTheme() {
   if (!window.CUSDIS) return;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   window.CUSDIS.setTheme(isDark ? 'dark' : 'light');
-}
+}*/
 
 function showRecordNotification() {
   const notif = document.getElementById('record-notification');
@@ -3145,9 +3145,9 @@ document.getElementById('menu-feedback').onclick = () => {
   document.getElementById('feedback-modal').classList.add('active');
 };
 
-document.getElementById('menu-reviews').onclick = () => {
-  document.getElementById('reviews-modal').classList.add('active');
-};
+// document.getElementById('menu-reviews').onclick = () => {
+ //  document.getElementById('reviews-modal').classList.add('active');
+// };
 
 document.getElementById('menu-donate').onclick = () => {
   document.getElementById('donate-modal').classList.add('active');
