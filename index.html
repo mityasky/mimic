@@ -1116,6 +1116,25 @@
           </table>
         </div>
       </div>
+	  
+<!--  БЛОКИ ЦИФРОВОГО ПОРТРЕТА -->
+<div id="portrait-readiness-block" class="chart-section" style="display:none; border: 2px dashed var(--primary); background: rgba(67, 97, 238, 0.05);"></div>
+
+<div id="portrait-content-block" class="chart-section" style="display:none;">
+    <h3 class="chart-title" style="margin-top: 24px;" data-i18n="portraitProgressTitle">Динамика прогресса (Валидные сессии)</h3>
+    <p class="chart-description" data-i18n="portraitProgressDesc">Тренд точности по последним 15 тренировкам длительностью >10 мин.</p>
+    <div class="chart-container" style="height: 250px;">
+        <canvas id="portrait-trend-chart"></canvas>
+    </div>
+
+    <h3 class="chart-title" style="margin-top: 24px;" data-i18n="portraitMatrixTitle">Матрица ошибок (Паттерны восприятия)</h3>
+    <p class="chart-description" data-i18n="portraitMatrixDesc">Какие эмоции путаются чаще всего. Красным выделены системные ошибки.</p>
+    <div id="error-matrix-container" style="overflow-x: auto;"></div>
+
+    <h3 class="chart-title" style="margin-top: 24px;" data-i18n="portraitReportTitle">Заключение для специалиста</h3>
+    <div id="psychologist-report" class="report-text" style="background: var(--bg); padding: 16px; border-radius: 8px; border-left: 4px solid var(--primary); font-style: italic; line-height: 1.6; white-space: pre-wrap;"></div>
+</div>
+
 	 
 	      <!--  КНОПКА ОЧИСТКИ СТАТИСТИКИ -->
     <button id="clear-advanced-stats-btn" class="btn-clear-advanced-stats" data-i18n="clearAdvancedStatsBtn">
