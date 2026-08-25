@@ -6367,7 +6367,7 @@ function updateDiaryTranslations() {
 // ===== МОДУЛЬ: ЦИФРОВОЙ ЭМОЦИОНАЛЬНЫЙ ПОРТРЕТ =====
 const EmotionalPortraitModule = (() => {
     const MIN_SESSIONS = 10;
-    const MIN_DURATION_SEC = 60; // 600 (10 минут); 60 (1 минута) для теста
+    const MIN_DURATION_SEC = 600; // 600 (10 минут); 60 (1 минута) для теста
 
     function getData() {
         const history = JSON.parse(localStorage.getItem('mimic_progress_history') || '[]');
