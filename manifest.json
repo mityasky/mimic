@@ -1,7 +1,7 @@
 {
   "name": "MIMIC",
   "short_name": "MIMIC",
-  "description": "Free emotion trainer",
+  "description": "Free emotion trainer via webcam",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f8f9fa",
