@@ -1,11 +1,56 @@
-// ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+// ============================================================================
+// МИМИК — ТРЕНАЖЁР ЭМОЦИЙ (app.js)
+// ============================================================================
+//
+// ОГЛАВЛЕНИЕ: (Ctrl+F для быстрого перехода)
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.  КОНФИГУРАЦИЯ И КОНСТАНТЫ      
+// 2.  СЛОВАРЬ ПЕРЕВОДОВ (translations)
+// 3.  ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И СОСТОЯНИЕ
+// 4.  МОДУЛЬ DB (IndexedDB / LocalForage)
+// 5.  МОДУЛЬ PROGRESS (История тренировок)
+// 6.  МОДУЛЬ ADVANCED STATS (Расширенная статистика)
+// 7.  МОДУЛЬ EMOTION DIARY (Дневник настроений)
+// 8.  МОДУЛЬ EMOTIONAL PORTRAIT (Цифровой портрет)
+// 9.  МОДУЛЬ STATE MONITOR (Мониторинг состояния/усталости)
+// 10. МОДУЛЬ ECHO MIRROR (Режим "Временная петля")
+// 11. МОДУЛЬ EMOTION DUEL (Режим "Эмоциональная дуэль")
+// 12. МОДУЛЬ TRAINING & CAMERA (Логика тренировки и камеры)
+// 13. МОДУЛЬ ONBOARDING (Инструкция при первом запуске)
+// 14. МОДУЛЬ PROGRESS EXPORT (Экспорт истории в PDF)
+// 15. ГЛОБАЛЬНЫЕ ФУНКЦИИ UI (Управление модалками, темой, языком)
+// 16. ОБРАБОТЧИКИ СОБЫТИЙ (Event Listeners)
+// 17. ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ (DOMContentLoaded)
+// 18. МОДУЛЬ УПРАВЛЕНИЯ AVATAR
+// 19. ДЕМО-РЕЖИМ "ТОЛЬКО КАМЕРА"
+// 20. ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ЭКРАНОВ
+// ============================================================================
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 3. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И СОСТОЯНИЕ
+// ═══════════════════════════════════════════════════════════════════════════
 let currentCameraStream = null;
 let bodyPixModel = null;
 let emotionModelLoaded = false;
 let emotionDetectionInterval = null;
 let score = 0;
 let lastFaceDetectedTime = 0;
-let highScore = parseInt(localStorage.getItem('mimicHighScore')) || 0;
+let highScore = 0;
+
+// Асинхронная загрузка рекорда из IndexedDB
+async function loadHighScore() {
+  const savedHighScore = await DB.get('mimicHighScore');
+  highScore = savedHighScore || 0;
+  updateScoreDisplay();
+  console.log(` High score loaded from IndexedDB: ${highScore}`);
+  
+  // Явно удаляем старый ключ из localStorage, если он там остался
+  if (localStorage.getItem('mimicHighScore') !== null) {
+    localStorage.removeItem('mimicHighScore');
+    console.log('🗑️ mimicHighScore removed from localStorage');
+  }
+}
+
 let lastRecordNotificationTime = 0; // Время последнего показа уведомления
 const RECORD_COOLDOWN = 5000;       // Задержка 5 секунд между показами
 let currentEmotionIndex = 0;
@@ -46,6 +91,9 @@ const detectorOptions = new faceapi.TinyFaceDetectorOptions({
   scoreThreshold: 0.6
 });
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 1. КОНФИГУРАЦИЯ И КОНСТАНТЫ
+// ═══════════════════════════════════════════════════════════════════════════
 // Список эмоций для тренировки
 const EMOTIONS = [
   { name: 'Радость', key: 'happy', emoji: '😊', imgs: ['emotions/happy.jpg', 'emotions/happy2.jpg', 'emotions/happy3.jpg', 'emotions/happy4.jpg', 'emotions/happy5.jpg', 'emotions/happy6.jpg'] },
@@ -60,7 +108,70 @@ const EMOTION_MODEL_URL = './models';
 const EAR_THRESHOLD = 0.25;
 const MAR_THRESHOLD = 0.65;
 
-// ===== ДЕМО-РЕЖИМ "ТОЛЬКО КАМЕРА" =====
+// ═══════════════════════════════════════════════════════════════════════════
+// 4. МОДУЛЬ DB (IndexedDB / LocalForage) (LocalForage Wrapper)
+// ═══════════════════════════════════════════════════════════════════════════ 
+const DB = {
+  // Инициализация конфигурации IndexedDB
+  init: () => {
+    localforage.config({
+      driver: localforage.INDEXEDDB, // Принудительно используем IndexedDB
+      name: 'MimicTrainerDB',
+      version: 1.0,
+      storeName: 'mimic_data',
+      description: 'Локальное хранилище данных тренажёра МИМИК'
+    });
+  },
+
+  // Универсальное получение данных с миграцией из localStorage
+  get: async (key) => {
+    try {
+      // 1. Сначала проверяем, есть ли данные уже в IndexedDB
+      let data = await localforage.getItem(key);
+      
+      // 2. Если нет, проверяем старый localStorage (для миграции)
+      if (data === null) {
+        const oldData = localStorage.getItem(key);
+        if (oldData !== null) {
+          console.log(`🔄 Миграция данных: ${key} из localStorage в IndexedDB`);
+          const parsed = JSON.parse(oldData);
+          await localforage.setItem(key, parsed); // Сохраняем в новую базу
+          localStorage.removeItem(key); // Очищаем старое хранилище
+          return parsed;
+        }
+      }
+      return data;
+    } catch (e) {
+      console.warn(`⚠️ Ошибка чтения из БД (${key}):`, e);
+      return null;
+    }
+  },
+
+  // Сохранение данных
+  set: async (key, value) => {
+    try {
+      await localforage.setItem(key, value);
+    } catch (e) {
+      console.warn(`⚠️ Ошибка записи в БД (${key}):`, e);
+    }
+  },
+
+  // Удаление данных
+  remove: async (key) => {
+    try {
+      await localforage.removeItem(key);
+    } catch (e) {
+      console.warn(`⚠️ Ошибка удаления из БД (${key}):`, e);
+    }
+  }
+};
+
+// Вызываем инициализацию сразу
+DB.init();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 19. ДЕМО-РЕЖИМ "ТОЛЬКО КАМЕРА"
+// ═══════════════════════════════════════════════════════════════════════════
 let isDemoMode = false;
 
 function startDemoMode() {
@@ -70,7 +181,7 @@ function startDemoMode() {
   document.getElementById('home-screen').classList.add('hidden');
   document.getElementById('training-view').classList.remove('hidden');
   
-  // 🆕 Показываем кнопку выхода из демо (убираем атрибут hidden)
+  // Показываем кнопку выхода из демо (убираем атрибут hidden)
   const exitDemoBtn = document.getElementById('btn-exit-demo');
   if (exitDemoBtn) exitDemoBtn.hidden = false;
   
@@ -135,7 +246,9 @@ function showDemoModeNotification() {
   }, 5000);
 }
 
-// Обработчик клика на кнопку демо-режима
+// ═══════════════════════════════════════════════════════════════════════════
+// 16. ОБРАБОТЧИКИ СОБЫТИЙ (Event Listeners)
+// ═══════════════════════════════════════════════════════════════════════════
 document.addEventListener('click', (e) => {
   if (e.target.closest('[data-action="demo-mode"]')) {
     e.preventDefault();
@@ -151,7 +264,9 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ===== МОДУЛЬ МОНИТОРИНГА СОСТОЯНИЯ (ИДЕАЛЬНЫЙ БАЛАНС: ЗАКРЫТЫЕ ГЛАЗА + УМНЫЙ ФИЛЬТР УЛЫБКИ) =====
+// ═══════════════════════════════════════════════════════════════════════════
+// 9. МОДУЛЬ STATE MONITOR (Мониторинг состояния/усталости)
+// ═══════════════════════════════════════════════════════════════════════════
 const StateMonitorModule = (() => {
   let monitorInterval = null;
   let blinkHistory = [];
@@ -433,7 +548,9 @@ const StateMonitorModule = (() => {
   };
 })();
 
-// ===== ИНИЦИАЛИЗАЦИЯ =====
+// ═══════════════════════════════════════════════════════════════════════════
+// 17. ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ (DOMContentLoaded)
+// ═══════════════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   initTensorFlow();
   initLanguage();
@@ -446,8 +563,11 @@ document.addEventListener('DOMContentLoaded', () => {
   TimeDelayModule.init();
   DynamicBackgroundModule.init();
   initSensoryMode();
+  loadHighScore();
   
-  //  Обработчик кнопки очистки расширенной статистики с автозакрытием
+// ═══════════════════════════════════════════════════════════════════════════
+// 16. ОБРАБОТЧИКИ СОБЫТИЙ (Event Listeners)
+// ═══════════════════════════════════════════════════════════════════════════
 const clearAdvStatsBtn = document.getElementById('clear-advanced-stats-btn');
 if (clearAdvStatsBtn) {
   clearAdvStatsBtn.addEventListener('click', () => {
@@ -488,7 +608,9 @@ if (typeof EmotionDiary !== 'undefined') {
 }
 });
 
-// ===== УПРАВЛЕНИЕ КАМЕРОЙ =====
+   // ═══════════════════════════════════════════════════════════════════════════
+   // 12. МОДУЛЬ TRAINING & CAMERA (Логика тренировки и камеры)
+   // ═══════════════════════════════════════════════════════════════════════════
 window.startCamera = async function () {
 	//  Запускаем мониторинг скуки/сонливости
 if (typeof StateMonitorModule !== 'undefined') {
@@ -852,6 +974,9 @@ function updateDetectedEmotion(emotion, confidence) {
   }
 }
 
+// Кэш ошибок в памяти для безопасной работы с IndexedDB
+let errorsPromise = DB.get('mimic_errors').then(e => e || []);
+
 function giveFeedback(isCorrect, detected) {
   const feedback = document.getElementById('feedback');
   if (isCorrect) {
@@ -866,11 +991,13 @@ function giveFeedback(isCorrect, detected) {
 	ProgressModule.trackIncorrect();
     AdvancedStatsModule.recordFailure(emotionKey);
 	
-		        // Сохраняем ошибку для Матрицы портрета
-        const errors = JSON.parse(localStorage.getItem('mimic_errors') || '[]');
-        errors.push({ target: emotionKey, shown: detected, time: Date.now() });
-        if (errors.length > 500) errors.shift(); // Храним не более 500 последних
-        localStorage.setItem('mimic_errors', JSON.stringify(errors));
+// Сохраняем ошибку для Матрицы портрета
+errorsPromise = errorsPromise.then(errors => {
+  errors.push({ target: emotionKey, shown: detected, time: Date.now() });
+  if (errors.length > 500) errors.shift(); // Храним не более 500 последних
+  DB.set('mimic_errors', errors).catch(e => console.warn('⚠️ Error saving errors to DB:', e));
+  return errors;
+});
   }
 }
 
@@ -883,7 +1010,7 @@ function addScore(points) {
 
   if (score > highScore) {
     highScore = score;
-    localStorage.setItem('mimicHighScore', highScore);
+    DB.set('mimicHighScore', highScore);
     showRecordNotification();
   }
 
@@ -1032,7 +1159,9 @@ function stopPersonDetection() {
   }
 }
 
-// ===== УПРАВЛЕНИЕ ТЕМОЙ =====
+// ═══════════════════════════════════════════════════════════════════════════
+// 15. ГЛОБАЛЬНЫЕ ФУНКЦИИ UI
+// ═══════════════════════════════════════════════════════════════════════════
 function initThemeToggle() {
   const themeBtn = document.getElementById('theme-toggle');
   const html = document.documentElement;
@@ -1078,7 +1207,9 @@ function initThemeToggle() {
   }
   updateThemeButton(isDark);
 
-  // Обработчик клика по кнопке
+// ═══════════════════════════════════════════════════════════════════════════
+// 16. ОБРАБОТЧИКИ СОБЫТИЙ (Event Listeners)
+// ═══════════════════════════════════════════════════════════════════════════
   themeBtn.addEventListener('click', () => {
     isDark = !isDark;
     if (isDark) {
@@ -1303,7 +1434,9 @@ window.toggleSound = function () {
   console.log(`🔇 Sound: ${soundEnabled ? 'ON' : 'OFF'}`);
 };
 
-// ===== СЛОВАРЬ ПЕРЕВОДОВ =====
+// ═══════════════════════════════════════════════════════════════════════════
+// 2. СЛОВАРЬ ПЕРЕВОДОВ (translations)
+// ═══════════════════════════════════════════════════════════════════════════
 const translations = {
   ru: {
     // Страница
@@ -1494,6 +1627,7 @@ newsItem11: '24.07.2026: Добавлен режим снижения сенсо
 newsItem12: '01.08.2026: Добавлен новый эмоциональный дневник в разделе Истории тренировок. После каждого занятия в режиме тренировки можно оставить обратную связь о своём настроении. Добавлен Демо-режим для демонстрации распознавания эмоций в реальном времени в раздел меню Помощь. Эмоциональный аватар и динамические фоны остаются активны, но отключаются игровой режим и система баллов. Сделаны мелкие улучшения интерфейса и добавлен таймер тренировки',
 newsItem13: '16.08.2026: На индикаторе лица в режиме тренировки добавлен новый индикатор текущего состояния внимания и сонливости (тестовый запуск и отладка нового алгоритма). Сделаны оптимизации интерфейса и повышена производительность',
 newsItem14: '25.08.2026: Обновлён модуль расширенной статистики в разделе Истории тренировок, в котором отображается комплексный, цифровой эмоциональный портрет. Для вычисления портрета необходимо набрать не менее 10 тренировок по 10 минут',
+newsItem15: '01.09.2026: Фронтенд обновление локального хранилища данных на стороне клиента, расположенного в специальной защищенной песочнице браузера, в которой находятся все результаты прогресса тренировок и расширенная статистика обучения. Хранилище localStorage заменено на IndexedDB, что позволяет хранить неограниченный объём данных, генерируемый алгоритмами в режиме обучения',
 newsPlanned: 'В разработке',
 newsPlanned1: 'Новые игровые режимы и улучшения уже имеющихся функций',
 newsPlanned2: 'Создание цифрового эмоционального портрета',
@@ -1913,6 +2047,7 @@ newsItem11: 'July 24, 2026: A Sensory-Friendly mode has been added to the main p
 newsItem12: 'August 01, 2026: A new mood tracker has been added to the Training History section. After each training session, you can provide feedback on your mood. A new Demo mode to showcase real-time emotion recognition in the Help section was added. The emotional avatar and dynamic backgrounds remain active, but the game mode and scoring system are disabled. Minor interface improvements were made, and a training timer was added',
 newsItem13: 'August 16, 2026: A new indicator showing the current state of attention and drowsiness has been added to the face display in training mode (test run and debugging of the new algorithm). Interface optimizations have been implemented, and performance has been improved',
 newsItem14: 'August 25, 2026: The advanced statistics module in the Training History section has been updated, displaying a comprehensive, digital emotional profile. To calculate the profile, you need to log at least 10 10-minute trainings',
+newsItem15: 'September 1, 2026: A front-end update to the client-side local data storage, located in a special secure browser sandbox, which stores all training progress results and advanced training statistics. LocalStorage has been replaced with IndexedDB, allowing for unlimited storage of data generated by algorithms in training mode',
 newsPlanned: 'In Development',
 newsPlanned1: 'New game modes and improvements to existing features',
 newsPlanned2: 'Digital emotional portrait creation',
@@ -2471,8 +2606,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ===== ONBOARDING / ИНСТРУКЦИЯ ПРИ ПЕРВОМ ЗАПУСКЕ =====
-
+   // ═══════════════════════════════════════════════════════════════════════════
+   // 13. МОДУЛЬ ONBOARDING (Инструкция при первом запуске)
+   // ═══════════════════════════════════════════════════════════════════════════
 const Onboarding = (() => {
   let currentStep = 1;
   const totalSteps = 6;
@@ -2777,7 +2913,7 @@ function showRecordNotification() {
 function resetHighScore() {
   if (confirm(translations[currentLang].confirmResetRecord || 'Сбросить рекорд?')) {
     highScore = 0;
-    localStorage.setItem('mimicHighScore', 0);
+    DB.set('mimicHighScore', 0);
     updateScoreDisplay();
     showStatus(translations[currentLang].recordReset || '🗑️ Рекорд сброшен!', 'info');
   }
@@ -2798,7 +2934,9 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// ===== ЛОГИКА РЕЖИМА ДУЭТ =====
+   // ═══════════════════════════════════════════════════════════════════════════
+   // 11. МОДУЛЬ EMOTION DUEL (Режим "Эмоциональная дуэль")
+   // ═══════════════════════════════════════════════════════════════════════════
 let duelStream = null;
 let duelVideo = null;
 let duelAnimFrame = null;
@@ -3184,7 +3322,9 @@ function updateFaceDetectionStatus(isDetected) {
   });
 })();
 
-// ===== ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ЭКРАНОВ =====
+// ============================================================================
+// 20.ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ЭКРАНОВ
+// ============================================================================
 const homeScreen = document.getElementById('home-screen');
 const trainingView = document.getElementById('training-view');
 const tileTraining = document.getElementById('tile-training');
@@ -3817,7 +3957,9 @@ const banner = document.getElementById('duel-emotion-banner');
 if (banner) banner.hidden = true;
 };
 
-// Обработчик кнопки "Начали!"
+// ═══════════════════════════════════════════════════════════════════════════
+// 16. ОБРАБОТЧИКИ СОБЫТИЙ (Event Listeners)
+// ═══════════════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   const duelStartBtn = document.getElementById('duel-start-btn');
   if (duelStartBtn) {
@@ -3837,7 +3979,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ===== МОДУЛЬ УПРАВЛЕНИЯ AVATAR =====
+// ═══════════════════════════════════════════════════
+// 18. МОДУЛЬ УПРАВЛЕНИЯ AVATAR
+// ═══════════════════════════════════════════════════
 const AvatarController = (() => {
   const container = document.getElementById('avatar-container');
   const mouth = document.querySelector('.avatar-mouth');
@@ -4116,28 +4260,29 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 })();
 
-// ===== МОДУЛЬ ИСТОРИИ ПРОГРЕССА =====
+// ═══════════════════════════════════════════════════════════════════════════
+// 5. МОДУЛЬ PROGRESS (История тренировок)
+// ═══════════════════════════════════════════════════════════════════════════
 const ProgressModule = (() => {
   const STORAGE_KEY = 'mimic_progress_history';
   const MAX_ENTRIES = 100;
   let chartInstance = null;
 
-  // 1. Управление данными
+  // 1. Управление данными (Асинхронное)
   const Storage = {
-    get: () => {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } 
-      catch { return []; }
+    get: async () => {
+      const data = await DB.get(STORAGE_KEY);
+      return Array.isArray(data) ? data : [];
     },
-    save: (data) => {
-      const history = Storage.get();
+    save: async (data) => {
+      const history = await Storage.get();
       history.push(data);
       if (history.length > MAX_ENTRIES) history.shift();
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(history)); } 
-      catch (e) { console.warn('⚠️ Progress storage quota exceeded'); }
+      await DB.set(STORAGE_KEY, history);
     },
-    clear: () => {
-      localStorage.removeItem(STORAGE_KEY);
-      updateSummary();
+    clear: async () => {
+      await DB.remove(STORAGE_KEY);
+      await updateSummary();
       renderChart();
     }
   };
@@ -4176,17 +4321,17 @@ end: () => {
   };
 
   // 3. UI Обновления
-  const UI = {
-    open: () => {
-      document.getElementById('progress-modal').classList.add('active');
-      updateSummary();
-      renderChart();
-    },
-    close: () => document.getElementById('progress-modal').classList.remove('active')
-  };
+const UI = {
+  open: async () => {
+    document.getElementById('progress-modal').classList.add('active');
+    await updateSummary();
+    await renderChart(); //  Добавил await
+  },
+  close: () => document.getElementById('progress-modal').classList.remove('active')
+};
 
-  function updateSummary() {
-    const history = Storage.get();
+async function updateSummary() {
+    const history = await Storage.get();
     const total = history.length;
     const bestStreak = total ? Math.max(...history.map(h => h.streak)) : 0;
     const avgAcc = total ? Math.round(history.reduce((a, h) => a + h.accuracy, 0) / total) : 0;
@@ -4196,15 +4341,15 @@ end: () => {
     document.getElementById('stat-accuracy').textContent = `${avgAcc}%`;
   }
 
-function renderChart() {
-  const history = Storage.get();
+async function renderChart() {
+  const history = await Storage.get();
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
   const textColor = isDark ? '#eaeaea' : '#212529';
   const primary = isDark ? '#5a76ff' : '#4361ee';
   const primaryAlpha = isDark ? 'rgba(90,118,255,0.2)' : 'rgba(67,97,238,0.2)';
 
-  // 🆕 Уничтожаем старые графики перед перерисовкой, чтобы не было наложения
+  //  Уничтожаем старые графики перед перерисовкой, чтобы не было наложения
   if (window.chartYInstance) window.chartYInstance.destroy();
   if (window.chartDataInstance) window.chartDataInstance.destroy();
 
@@ -4240,9 +4385,6 @@ function renderChart() {
     });
   }
 
-  // ==========================================
-  // 2. ГРАФИК С ДАННЫМИ
-  // ==========================================
   const ctxData = document.getElementById('progress-chart-data');
   
   if (ctxData) {
@@ -4339,7 +4481,7 @@ label: (context) => {
   }
 }
 
-// 🆕 Функция для включения перетаскивания и скролла графика
+// Функция для включения перетаскивания и скролла графика
 function initChartPanning() {
   const container = document.querySelector('.chart-data-container');
   if (!container) return;
@@ -4464,7 +4606,10 @@ saveSession: () => {
 },
 Session: Session,
     init: () => {
-      // Обработчики UI
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 16. ОБРАБОТЧИКИ СОБЫТИЙ (Event Listeners)
+// ═══════════════════════════════════════════════════════════════════════════
       document.getElementById('menu-progress')?.addEventListener('click', UI.open);
       document.getElementById('progress-close')?.addEventListener('click', UI.close);
       document.getElementById('clear-progress-btn')?.addEventListener('click', () => {
@@ -4485,7 +4630,9 @@ Session: Session,
 // Инициализация после загрузки DOM
 document.addEventListener('DOMContentLoaded', ProgressModule.init);
 
-// ===== ЭКСПОРТ ПРОГРЕССА В PDF =====
+   // ═══════════════════════════════════════════════════════════════════════════
+   // 14. МОДУЛЬ PROGRESS EXPORT (Экспорт истории в PDF)
+   // ═══════════════════════════════════════════════════════════════════════════
 const ProgressExport = (() => {
   let jsPDF, html2canvas;
 
@@ -4778,7 +4925,9 @@ const TimeDelayModule = (() => {
     
     ctx = canvas.getContext('2d');
     
-    // Обработчик кнопки
+// ═══════════════════════════════════════════════════════════════════════════
+// 16. ОБРАБОТЧИКИ СОБЫТИЙ (Event Listeners)
+// ═══════════════════════════════════════════════════════════════════════════
     const btn = document.getElementById('btn-time-delay');
     if (btn) {
       btn.addEventListener('click', toggle);
@@ -5039,7 +5188,9 @@ const DynamicBackgroundModule = (() => {
   return { init, toggle, updateBackground, renderBackground, disable };
 })();
 
-// ===== РЕЖИМ "ЭХО-ЗЕРКАЛО" =====
+   // ═══════════════════════════════════════════════════════════════════════════
+   // 10. МОДУЛЬ ECHO MIRROR (Режим "Временная петля")
+   // ═══════════════════════════════════════════════════════════════════════════
 const EchoMirrorMode = (() => {
   // Конфигурация
   const ECHO_DELAY_SEC = 5;
@@ -5147,7 +5298,7 @@ let offscreenCtx = null;
   totalAttempts = 0;
   updateUI();
   
-  // 🎵 Генерируем рандомные эмоции для rhythm
+  // Генерируем рандомные эмоции для rhythm
   if (scenario === 'rhythm') {
     rhythmEmotions = getRandomEmotions(TASKS_PER_ROUND);
     console.log('🎵 Rhythm emotions:', rhythmEmotions);
@@ -5799,10 +5950,12 @@ document.addEventListener('DOMContentLoaded', () => {
   EchoMirrorMode.init();
 });
 
-// ===== МОДУЛЬ РАСШИРЕННОЙ СТАТИСТИКИ (С МИГРАЦИЕЙ И ФИЛЬТРАЦИЕЙ ПО ДАТАМ) =====
+// ═══════════════════════════════════════════════════════════════════════════
+// 6. МОДУЛЬ ADVANCED STATS (Расширенная статистика)
+// ═══════════════════════════════════════════════════════════════════════════
 const AdvancedStatsModule = (() => {
   const NEW_STORAGE_KEY = 'mimic_advanced_stats_daily';
-  const OLD_STORAGE_KEY = 'mimic_advanced_stats'; // 🆕 Ключ для миграции старых данных
+  const OLD_STORAGE_KEY = 'mimic_advanced_stats'; // Ключ для миграции старых данных
   const EMOTION_KEYS = ['happy', 'sad', 'angry', 'surprised', 'fearful', 'disgusted'];
   
   let dailyStats = {};
@@ -5814,55 +5967,58 @@ const AdvancedStatsModule = (() => {
     return new Date().toISOString().split('T')[0];
   }
 
-  function init() {
-    try {
-      // 1. Загружаем новые данные, если они уже есть
-      const savedDaily = localStorage.getItem(NEW_STORAGE_KEY);
-      if (savedDaily) {
-        dailyStats = JSON.parse(savedDaily);
-      } else {
-        dailyStats = {};
-      }
-
-      // 2. 🆕 ПРОВЕРКА И МИГРАЦИЯ СТАРОЙ СТАТИСТИКИ
-      const oldStatsStr = localStorage.getItem(OLD_STORAGE_KEY);
-      if (oldStatsStr) {
-        try {
-          const oldStats = JSON.parse(oldStatsStr);
-          const today = getTodayKey();
-          
-          // Инициализируем сегодняшний день, если его еще нет
-          if (!dailyStats[today]) {
-            dailyStats[today] = {};
-            EMOTION_KEYS.forEach(key => {
-              dailyStats[today][key] = { attempts: 0, correct: 0, totalTime: 0 };
-            });
-          }
-
-          // Переносим накопленные данные в "сегодняшнюю" запись
-          EMOTION_KEYS.forEach(key => {
-            if (oldStats[key]) {
-              dailyStats[today][key].attempts += oldStats[key].attempts || 0;
-              dailyStats[today][key].correct += oldStats[key].correct || 0;
-              dailyStats[today][key].totalTime += oldStats[key].totalTime || 0;
-            }
-          });
-
-          // Сохраняем обновленную структуру в новый ключ
-          save();
-
-          // Удаляем старый ключ, чтобы миграция произошла только один раз
-          localStorage.removeItem(OLD_STORAGE_KEY);
-          console.log('✅ Старая статистика успешно мигрирована в новый формат.');
-        } catch (e) {
-          console.warn('⚠️ Ошибка при миграции старой статистики:', e);
-        }
-      }
-    } catch (e) {
-      console.error('❌ Ошибка инициализации статистики:', e);
+async function init() {
+  try {
+    // 1. Пытаемся получить данные из новой базы
+    const savedDaily = await DB.get(NEW_STORAGE_KEY);
+    
+    if (savedDaily) {
+      dailyStats = savedDaily;
+    } else {
       dailyStats = {};
     }
+    
+    // 2.  ПРОВЕРКА И МИГРАЦИЯ СТАРОЙ СТАТИСТИКИ (восстановлено)
+    const oldStatsStr = localStorage.getItem(OLD_STORAGE_KEY);
+    if (oldStatsStr) {
+      try {
+        const oldStats = JSON.parse(oldStatsStr);
+        const today = getTodayKey();
+        
+        // Инициализируем сегодняшний день, если его еще нет
+        if (!dailyStats[today]) {
+          dailyStats[today] = {};
+          EMOTION_KEYS.forEach(key => {
+            dailyStats[today][key] = { attempts: 0, correct: 0, totalTime: 0 };
+          });
+        }
+        
+        // Переносим накопленные данные в "сегодняшнюю" запись
+        EMOTION_KEYS.forEach(key => {
+          if (oldStats[key]) {
+            dailyStats[today][key].attempts += oldStats[key].attempts || 0;
+            dailyStats[today][key].correct += oldStats[key].correct || 0;
+            dailyStats[today][key].totalTime += oldStats[key].totalTime || 0;
+          }
+        });
+        
+        // Сохраняем обновленную структуру в новую базу
+        await save();
+        
+        // Удаляем старый ключ, чтобы миграция произошла только один раз
+        localStorage.removeItem(OLD_STORAGE_KEY);
+        console.log('✅ Старая статистика успешно мигрирована в IndexedDB.');
+      } catch (e) {
+        console.warn('⚠️ Ошибка при миграции старой статистики:', e);
+      }
+    }
+    
+    console.log('✅ Advanced Stats loaded from IndexedDB');
+  } catch (e) {
+    console.error('❌ Ошибка инициализации статистики:', e);
+    dailyStats = {};
   }
+}
 
   function ensureTodayExists() {
     const today = getTodayKey();
@@ -5875,9 +6031,9 @@ const AdvancedStatsModule = (() => {
     return today;
   }
 
-  function save() {
+  async function save() {
     try {
-      localStorage.setItem(NEW_STORAGE_KEY, JSON.stringify(dailyStats));
+      await DB.set(NEW_STORAGE_KEY, dailyStats);
     } catch (e) {
       console.warn('⚠️ Advanced stats storage quota exceeded');
     }
@@ -5953,9 +6109,9 @@ const AdvancedStatsModule = (() => {
     });
   }
   
-  function clearData() {
+  async function clearData() {
     dailyStats = {};
-    save();
+    await DB.set(NEW_STORAGE_KEY, dailyStats); // Перезаписываем пустым объектом
   }
 
   function setFilter(days) {
@@ -5973,14 +6129,13 @@ const AdvancedStatsModule = (() => {
     
     if (typeof translatePage === 'function') translatePage(currentLang);
     
-    setTimeout(() => {
-      renderRadarChart();
-      renderStatsTable();
-      // Вызов модуля цифрового портрета
-      if (typeof EmotionalPortraitModule !== 'undefined') {
-          EmotionalPortraitModule.render();
-      }
-    }, 100);
+setTimeout(() => {
+  renderRadarChart();
+  renderStatsTable();
+  if (typeof EmotionalPortraitModule !== 'undefined') {
+      EmotionalPortraitModule.render().catch(e => console.warn('Portrait render error:', e));
+  }
+}, 100);
   }
 
   function closeModal() {
@@ -6131,7 +6286,9 @@ const AdvancedStatsModule = (() => {
       });
     }
 
-    // Обработчик изменения фильтра
+// ═══════════════════════════════════════════════════════════════════════════
+// 16. ОБРАБОТЧИКИ СОБЫТИЙ (Event Listeners)
+// ═══════════════════════════════════════════════════════════════════════════
     const statsFilter = document.getElementById('stats-time-filter');
     if (statsFilter) {
       statsFilter.addEventListener('change', (e) => {
@@ -6157,7 +6314,9 @@ const AdvancedStatsModule = (() => {
 })();
 
 
-// ===== МОДУЛЬ: ЭМОЦИОНАЛЬНЫЙ ДНЕВНИК =====
+// ═══════════════════════════════════════════════════════════════════════════
+// 7. МОДУЛЬ EMOTION DIARY (Дневник настроений)
+// ═══════════════════════════════════════════════════════════════════════════
 const EmotionDiary = (() => {
   const STORAGE_KEY = 'mimicEmotionDiary';
   const EMOJI_MAP = {
@@ -6170,33 +6329,33 @@ const EmotionDiary = (() => {
   };
   
   // Получить все записи
-  function getAll() {
+  async function getAll() {
     try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
+      const data = await DB.get(STORAGE_KEY);
+      return Array.isArray(data) ? data : [];
     } catch (e) {
       console.warn('Diary: error reading storage', e);
       return [];
     }
   }
-  
+
   // Сохранить новую запись
-  function save(emotionKey) {
-    const entries = getAll();
+  async function save(emotionKey) {
+    const entries = await getAll();
     entries.unshift({
       emotion: emotionKey,
       emoji: EMOJI_MAP[emotionKey] || '😐',
       timestamp: Date.now(),
       date: new Date().toISOString()
     });
-    // Храним максимум 100 последних записей
+    
     if (entries.length > 100) entries.length = 100;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    await DB.set(STORAGE_KEY, entries);
   }
-  
+
   // Очистить дневник
-  function clear() {
-    localStorage.removeItem(STORAGE_KEY);
+  async function clear() {
+    await DB.remove(STORAGE_KEY);
   }
   
   // Показать модалку выбора эмоции
@@ -6239,7 +6398,7 @@ const EmotionDiary = (() => {
   }
   
   // Показать историю
-  function showHistory() {
+  async function showHistory() { 
     const modal = document.getElementById('diary-history-modal');
     const list = document.getElementById('diary-history-list');
     const empty = document.getElementById('diary-history-empty');
@@ -6247,7 +6406,7 @@ const EmotionDiary = (() => {
     
     if (!modal || !list) return;
     
-    const entries = getAll();
+    const entries = await getAll();
     
     if (entries.length === 0) {
       list.classList.add('hidden');
@@ -6364,19 +6523,22 @@ function updateDiaryTranslations() {
   });
 }
 
-// ===== МОДУЛЬ: ЦИФРОВОЙ ЭМОЦИОНАЛЬНЫЙ ПОРТРЕТ =====
+// ═══════════════════════════════════════════════════════════════════════════
+// 8. МОДУЛЬ EMOTIONAL PORTRAIT (Цифровой портрет)
+// ═══════════════════════════════════════════════════════════════════════════
 const EmotionalPortraitModule = (() => {
     const MIN_SESSIONS = 10;
-    const MIN_DURATION_SEC = 600; // 600 (10 минут); 60 (1 минута) для теста
+    const MIN_DURATION_SEC = 60; // 600 (10 минут); 60 (1 минута) для теста
 
-    function getData() {
-        const history = JSON.parse(localStorage.getItem('mimic_progress_history') || '[]');
-        const errors = JSON.parse(localStorage.getItem('mimic_errors') || '[]');
+    async function getData() {
+        // DB.get автоматически мигрирует данные из localStorage при первом вызове
+        const history = await DB.get('mimic_progress_history') || [];
+        const errors = await DB.get('mimic_errors') || [];
         return { history, errors };
     }
 
-    function checkReadiness() {
-        const { history } = getData();
+    async function checkReadiness() {
+        const { history } = await getData();
         const validSessions = history.filter(s => (s.time || 0) >= MIN_DURATION_SEC);
         return {
             isReady: validSessions.length >= MIN_SESSIONS,
@@ -6551,7 +6713,7 @@ function renderErrorMatrix(errors) {
             const count = matrix[target][shown];
             const isTarget = target === shown;
             
-            // 🆕 ОДИН ФИКСИРОВАННЫЙ КРАСНЫЙ ЦВЕТ для всех ошибок
+            // ОДИН ФИКСИРОВАННЫЙ КРАСНЫЙ ЦВЕТ для всех ошибок
             let style = '';
             if (count > 0 && !isTarget) {
                 style = `background: rgba(231, 76, 60, 0.6); color: white; font-weight: bold;`;
@@ -6565,61 +6727,58 @@ function renderErrorMatrix(errors) {
     container.innerHTML = html;
 }
 
-    function render() {
-        const readiness = checkReadiness();
-        const readinessBlock = document.getElementById('portrait-readiness-block');
-        const contentBlock = document.getElementById('portrait-content-block');
-        if (!readinessBlock || !contentBlock) return;
-		
-		// Обновляем переводы в заголовках
-if (typeof translatePage === 'function') {
+async function render() {
+    const readiness = await checkReadiness();
+    const readinessBlock = document.getElementById('portrait-readiness-block');
     const contentBlock = document.getElementById('portrait-content-block');
-    if (contentBlock) {
-        contentBlock.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (translations[currentLang]?.[key]) {
-                el.textContent = translations[currentLang][key];
-            }
-        });
+    if (!readinessBlock || !contentBlock) return;
+    
+    // Обновляем переводы в заголовках
+    if (typeof translatePage === 'function') {
+        if (contentBlock) {
+            contentBlock.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang]?.[key]) {
+                    el.textContent = translations[currentLang][key];
+                }
+            });
+        }
     }
-}
 
-if (!readiness.isReady) {
-    readinessBlock.style.display = 'block';
-    contentBlock.style.display = 'none';
-    const t = translations[currentLang];
-    readinessBlock.innerHTML = `
-        <h3>${t.portraitTitle}</h3>
-        <p>${t.portraitNeedMore}</p>
-        <div class="progress-info">
-            <strong>${t.portraitProgressLabel}</strong> ${readiness.validCount} ${t.portraitSessionsOf} ${MIN_SESSIONS} ${t.portraitValidSessions}<br>
-            <strong>${t.portraitTotalSessions}</strong> ${readiness.totalCount}.
-        </div>
-        <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: 10px;">
-            ${t.portraitContinueTraining}
-        </p>
-    `;
-    return;
-}
-
-        readinessBlock.style.display = 'none';
-        contentBlock.style.display = 'block';
-
-        const { history, errors } = getData();
-        
-        const validSessions = history.filter(s => (s.time || 0) >= MIN_DURATION_SEC)
-            .sort((a, b) => new Date(a.date || Date.now()).getTime() - new Date(b.date || Date.now()).getTime());
-        
-        const last15Sessions = validSessions.slice(-15);
-
-        const trend = analyzeTrend(last15Sessions);
-        const fatigue = analyzeFatigue(history);
-        const report = generateReport(trend, fatigue, readiness);
-
-        document.getElementById('psychologist-report').innerText = report;
-        renderTrendChart(last15Sessions);
-        renderErrorMatrix(errors);
+    if (!readiness.isReady) {
+        readinessBlock.style.display = 'block';
+        contentBlock.style.display = 'none';
+        const t = translations[currentLang];
+        readinessBlock.innerHTML = `
+            <h3>${t.portraitTitle}</h3>
+            <p>${t.portraitNeedMore}</p>
+            <div class="progress-info">
+                <strong>${t.portraitProgressLabel}</strong> ${readiness.validCount} ${t.portraitSessionsOf} ${MIN_SESSIONS} ${t.portraitValidSessions}<br>
+                <strong>${t.portraitTotalSessions}</strong> ${readiness.totalCount}.
+            </div>
+            <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: 10px;">
+                ${t.portraitContinueTraining}
+            </p>
+        `;
+        return;
     }
+
+    readinessBlock.style.display = 'none';
+    contentBlock.style.display = 'block';
+
+    const { history, errors } = await getData();
+    const validSessions = history.filter(s => (s.time || 0) >= MIN_DURATION_SEC)
+        .sort((a, b) => new Date(a.date || Date.now()).getTime() - new Date(b.date || Date.now()).getTime());
+    const last15Sessions = validSessions.slice(-15);
+
+    const trend = analyzeTrend(last15Sessions);
+    const fatigue = analyzeFatigue(history);
+    const report = generateReport(trend, fatigue, readiness);
+
+    document.getElementById('psychologist-report').innerText = report;
+    renderTrendChart(last15Sessions);
+    renderErrorMatrix(errors);
+}
 
     return { render, checkReadiness };
 })();
