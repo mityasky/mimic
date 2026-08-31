@@ -6,6 +6,9 @@
 4. Methodological Framework: Differentiation based on training difficulty has been implemented, and further development of the methodology is planned.
 5. UX and Accessibility: Offline mode support (PWA), human and face detection in video streams, lighting control for accurate neural network operation, and adaptability to mobile devices.
 
-To start unit-tests and 
-npm install
-npm test ui
+
+To start Unit and Integration tests:
+
+npm install (in the project folder)
+
+npm test ui (to start 81 tests)
