@@ -5,3 +5,7 @@
 3. Lesson modes: "Training" (individual work), "Duet" (joint repetition with a mentor), "Emotional Duel" (competitive format for two players).
 4. Methodological Framework: Differentiation based on training difficulty has been implemented, and further development of the methodology is planned.
 5. UX and Accessibility: Offline mode support (PWA), human and face detection in video streams, lighting control for accurate neural network operation, and adaptability to mobile devices.
+
+To start unit-tests and 
+npm install
+npm test ui
