@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mimic-cache-v6'; // v6 — исправленная стратегия
+const CACHE_NAME = 'mimic-cache-v6.2';
 
 // Базовые файлы (кэшируем в первую очередь, стратегия Cache-First)
 const STATIC_ASSETS = [
@@ -11,8 +11,9 @@ const STATIC_ASSETS = [
   './lib/body-pix.min.js',
   './lib/face-api.js',
   './lib/chart.min.js',
-    './lib/jspdf.umd.min.js',
-  './lib/html2canvas.min.js'
+  './lib/jspdf.umd.min.js',
+  './lib/html2canvas.min.js',
+  './lib/localforage.min.js'
   ];
 
 // Файлы моделей (тяжёлые, но статичные)
