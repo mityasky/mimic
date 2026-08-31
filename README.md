@@ -7,6 +7,9 @@
 5. UX and Accessibility: Offline mode support (PWA), human and face detection in video streams, lighting control for accurate neural network operation, and adaptability to mobile devices.
 
 
+You can share accumulated data in your training history, which will be used for scientific research. All data is sent anonymously and does not contain sensitive personal information of childrens. If you have accumulated more than 10 sessions of at least 10 minutes, please send them to the developer as feedback. Your data will be included in the group statistics and will also allow us to evaluate the effectiveness of training on the platform.
+
+
 To start Unit and Integration tests:
 
 npm install (in the project folder)
