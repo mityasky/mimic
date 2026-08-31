@@ -1,0 +1,10 @@
+# Зависимости Node.js
+node_modules/
+
+# Отчёты о покрытии кода тестами
+coverage/
+
+# Логи и временные файлы ОС
+.DS_Store
+Thumbs.db
+*.log
