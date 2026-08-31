@@ -24,6 +24,7 @@
 // 18. МОДУЛЬ УПРАВЛЕНИЯ AVATAR
 // 19. ДЕМО-РЕЖИМ "ТОЛЬКО КАМЕРА"
 // 20. ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ЭКРАНОВ
+// 21. ЭКСПОРТ И ОТПРАВКА АНОНИМНЫХ ДАННЫХ
 // ============================================================================
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1445,6 +1446,24 @@ const translations = {
     appTitle: 'МИМИК Тренажёр Эмоций',
 	sensoryModeTitle: 'Режим снижения сенсорной нагрузки',
 	
+	shareProgressBtn: 'Поделиться анонимными данными для науки',
+consentTitle: '📜 Согласие на отправку данных',
+consentParagraph1: 'Нажимая «Отправить», вы соглашаетесь с тем, что <strong>обезличенные данные</strong> ваших тренировок (точность, время, ошибки) будут отправлены разработчику на адрес mityasky@ya.ru.',
+consentParagraph2: 'Эти данные используются исключительно в научных целях для улучшения точности распознавания и развития проекта «МИМИК». Результаты могут быть опубликованы в открытом доступе в виде обобщенной статистики, <strong>не содержащей персональной информации</strong>.',
+consentNote: '🔒 Ваш эмоциональный дневник и личные записи <strong>не включаются</strong> в этот отчет.',
+consentInstruction: '📎 Файл с данными уже сохранен на вашем устройстве. <strong>Пожалуйста, прикрепите его к письму</strong> перед отправкой.',
+consentCancel: 'Отмена',
+consentSend: '✉️ Открыть почтовый клиент',
+
+genderNotSpecified: 'Не указан',
+genderMale: 'Мужской',
+genderFemale: 'Женский',
+
+selectGender: 'Выберите пол',
+demographicsGender: 'Пол: *',
+demographicsAge: 'Возраст (лет): *',
+consentInstruction: '📎 <strong>Заполните обязательные поля выше.</strong> Файл с данными будет скачан на ваше устройство при нажатии кнопки «Открыть почтовый клиент». <strong>Пожалуйста, прикрепите его к письму</strong>.',
+	
 	filterAllTime: 'За всё время',
 filterLast60Days: 'За последние 60 дней',
 filterLast30Days: 'За последние 30 дней',
@@ -1627,7 +1646,8 @@ newsItem11: '24.07.2026: Добавлен режим снижения сенсо
 newsItem12: '01.08.2026: Добавлен новый эмоциональный дневник в разделе Истории тренировок. После каждого занятия в режиме тренировки можно оставить обратную связь о своём настроении. Добавлен Демо-режим для демонстрации распознавания эмоций в реальном времени в раздел меню Помощь. Эмоциональный аватар и динамические фоны остаются активны, но отключаются игровой режим и система баллов. Сделаны мелкие улучшения интерфейса и добавлен таймер тренировки',
 newsItem13: '16.08.2026: На индикаторе лица в режиме тренировки добавлен новый индикатор текущего состояния внимания и сонливости (тестовый запуск и отладка нового алгоритма). Сделаны оптимизации интерфейса и повышена производительность',
 newsItem14: '25.08.2026: Обновлён модуль расширенной статистики в разделе Истории тренировок, в котором отображается комплексный, цифровой эмоциональный портрет. Для вычисления портрета необходимо набрать не менее 10 тренировок по 10 минут',
-newsItem15: '01.09.2026: Фронтенд обновление локального хранилища данных на стороне клиента, расположенного в специальной защищенной песочнице браузера, в которой находятся все результаты прогресса тренировок и расширенная статистика обучения. Хранилище localStorage заменено на IndexedDB, что позволяет хранить неограниченный объём данных, генерируемый алгоритмами в режиме обучения',
+newsItem15: '31.08.2026: Фронтенд обновление локального хранилища данных на стороне клиента, расположенного в специальной защищенной песочнице браузера, в которой находятся все результаты прогресса тренировок и расширенная статистика обучения. Хранилище localStorage заменено на IndexedDB, что позволяет хранить неограниченный объём данных, генерируемый алгоритмами в режиме обучения',
+newsItem16: '01.09.2026: В истории тренировок теперь можно поделиться накопленными данными, которые будут использованы в научном исследовании. Все данные отправляются в анонимном формате и не содержат чувствительных персональных данных детей. Пожалуйста, если вы накопили более 10 сессий длительностью не менее 10 минут, отправьте их разработчику в качестве обратной связи и ваши данные войдут в групповую статистику, а также позволят оценить эффективность тренировок на платформе',
 newsPlanned: 'В разработке',
 newsPlanned1: 'Новые игровые режимы и улучшения уже имеющихся функций',
 newsPlanned2: 'Создание цифрового эмоционального портрета',
@@ -1864,6 +1884,24 @@ portraitDataValid: 'полноценных тренировок (более 10 �
     appTitle: 'MIMIC Emotion Trainer',
 	sensoryModeTitle: 'Sensory-Friendly Mode',
 	
+	shareProgressBtn: 'Share anonymous data for science',
+consentTitle: '📜 Consent to Data Submission',
+consentParagraph1: 'By clicking "Send", you agree that <strong>anonymized data</strong> of your training sessions (accuracy, time, errors) will be sent to the developer at mityasky@ya.ru.',
+consentParagraph2: 'This data is used exclusively for scientific purposes to improve recognition accuracy and develop the "MIMIC" project. Results may be published in open access as aggregated statistics, <strong>containing no personal information</strong>.',
+consentNote: '🔒 Your emotion diary and personal notes are <strong>not included</strong> in this report.',
+consentInstruction: '📎 The data file has been saved to your device. <strong>Please attach it to the email</strong> before sending.',
+consentCancel: 'Cancel',
+consentSend: '✉️ Open Email Client',
+
+genderNotSpecified: 'Not specified',
+genderMale: 'Male',
+genderFemale: 'Female',
+
+selectGender: 'Select gender',
+demographicsGender: 'Gender: *',
+demographicsAge: 'Age (years): *',
+consentInstruction: '📎 <strong>Please fill in the required fields above.</strong> The data file will be downloaded to your device when you click "Open Email Client". <strong>Please attach it to the email</strong>.',
+	
 	filterAllTime: 'All time',
 filterLast60Days: 'Last 60 days',
 filterLast30Days: 'Last 30 days',
@@ -2047,7 +2085,8 @@ newsItem11: 'July 24, 2026: A Sensory-Friendly mode has been added to the main p
 newsItem12: 'August 01, 2026: A new mood tracker has been added to the Training History section. After each training session, you can provide feedback on your mood. A new Demo mode to showcase real-time emotion recognition in the Help section was added. The emotional avatar and dynamic backgrounds remain active, but the game mode and scoring system are disabled. Minor interface improvements were made, and a training timer was added',
 newsItem13: 'August 16, 2026: A new indicator showing the current state of attention and drowsiness has been added to the face display in training mode (test run and debugging of the new algorithm). Interface optimizations have been implemented, and performance has been improved',
 newsItem14: 'August 25, 2026: The advanced statistics module in the Training History section has been updated, displaying a comprehensive, digital emotional profile. To calculate the profile, you need to log at least 10 10-minute trainings',
-newsItem15: 'September 1, 2026: A front-end update to the client-side local data storage, located in a special secure browser sandbox, which stores all training progress results and advanced training statistics. LocalStorage has been replaced with IndexedDB, allowing for unlimited storage of data generated by algorithms in training mode',
+newsItem15: 'August 31, 2026: A front-end update to the client-side local data storage, located in a special secure browser sandbox, which stores all training progress results and advanced training statistics. LocalStorage has been replaced with IndexedDB, allowing for unlimited storage of data generated by algorithms in training mode',
+newsItem16: 'September 1, 2026: You can now share accumulated data in your training history, which will be used for scientific research. All data is sent anonymously and does not contain sensitive personal information of childrens. If you have accumulated more than 10 sessions of at least 10 minutes, please send them to the developer as feedback. Your data will be included in the group statistics and will also allow us to evaluate the effectiveness of training on the platform',
 newsPlanned: 'In Development',
 newsPlanned1: 'New game modes and improvements to existing features',
 newsPlanned2: 'Digital emotional portrait creation',
@@ -2338,6 +2377,14 @@ let currentLang = 'ru';
 // ===== ФУНКЦИЯ ПЕРЕВОДА =====
 function translatePage(lang) {
   document.documentElement.lang = lang;
+  
+    //  Перевод с HTML-тегами через innerHTML
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if (translations[lang]?.[key]) {
+      el.innerHTML = translations[lang][key];
+    }
+  });
 
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
@@ -3975,6 +4022,131 @@ document.addEventListener('DOMContentLoaded', () => {
   if (tileDuel) {
     tileDuel.addEventListener('click', () => {
       openEmotionDuel();
+    });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 21. ЭКСПОРТ И ОТПРАВКА АНОНИМНЫХ ДАННЫХ
+// ═══════════════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  const shareBtn = document.getElementById('share-progress-btn');
+  const consentModal = document.getElementById('consent-modal');
+  const consentClose = document.getElementById('consent-close');
+  const consentCancel = document.getElementById('consent-cancel');
+  const consentSend = document.getElementById('consent-send');
+
+  // Функция закрытия модалки
+  const closeConsentModal = () => {
+    if (consentModal) {
+      consentModal.classList.remove('active');
+      setTimeout(() => { consentModal.hidden = true; }, 300);
+    }
+  };
+
+  // 1. Кнопка "Поделиться" теперь ТОЛЬКО открывает модальное окно
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      if (consentModal) {
+        consentModal.hidden = false;
+        setTimeout(() => consentModal.classList.add('active'), 10);
+      }
+    });
+  }
+
+  // Обработчики закрытия модалки
+  if (consentClose) consentClose.addEventListener('click', closeConsentModal);
+  if (consentCancel) consentCancel.addEventListener('click', closeConsentModal);
+  if (consentModal) {
+    consentModal.addEventListener('click', (e) => {
+      if (e.target === consentModal) closeConsentModal();
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (consentModal && e.key === 'Escape' && !consentModal.hidden) closeConsentModal();
+  });
+
+  // 2. Кнопка "Отправить" теперь выполняет валидацию, скачивание и открытие почты
+  if (consentSend) {
+    consentSend.addEventListener('click', async () => {
+      const genderSelect = document.getElementById('user-gender');
+      const ageInput = document.getElementById('user-age');
+
+      // 🛡️ Встроенная валидация HTML5 (проверяет required, min, max)
+      if (!genderSelect.checkValidity() || !ageInput.checkValidity()) {
+        genderSelect.reportValidity(); // Показывает стандартную подсказку браузера
+        ageInput.reportValidity();
+        return; // Прерываем выполнение, если поля не заполнены
+      }
+
+      try {
+        consentSend.disabled = true;
+        consentSend.innerHTML = '⏳ Подготовка данных...';
+
+        // Собираем данные из IndexedDB
+        const history = await DB.get('mimic_progress_history') || [];
+        const errors = await DB.get('mimic_errors') || [];
+        const stats = await DB.get('mimic_advanced_stats_daily') || {};
+
+        const anonymousId = 'user_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
+        const generatedFilename = `mimic-anonymous-${anonymousId}.json`;
+
+        // Формируем пакет данных С демографией
+        const payload = {
+          anonymous_id: anonymousId,
+          export_date: new Date().toISOString(),
+          app_version: '1.0',
+          demographics: {
+            gender: genderSelect.value,
+            age: parseInt(ageInput.value, 10) // Гарантированно число благодаря type="number" и min/max
+          },
+          data: {
+            total_sessions: history.length,
+            history: history,
+            errors: errors,
+            stats: stats
+          }
+        };
+
+        // Скачиваем файл
+        const jsonString = JSON.stringify(payload, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = generatedFilename;
+        document.body.appendChild(a);
+        a.click();
+        
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Формируем и открываем mailto
+        const lang = currentLang;
+        const isRu = lang === 'ru';
+        
+        const subject = encodeURIComponent(isRu 
+          ? `МИМИК: Анонимные данные для анализа (ID: ${anonymousId})`
+          : `MIMIC: Anonymous Data for Analysis (ID: ${anonymousId})`
+        );
+        
+        const body = encodeURIComponent(isRu 
+          ? `Здравствуйте, Дмитрий!\n\nЯ пользуюсь тренажёром «МИМИК» и хочу поделиться анонимными данными своих тренировок для улучшения проекта и научных исследований.\n\nФайл с обезличенной статистикой (${generatedFilename}) был только что скачан на моё устройство. Пожалуйста, убедитесь, что он прикреплён к этому письму.\n\nЯ ознакомлен с тем, что эти данные могут быть использованы для подготовки научных публикаций в обезличенном виде.\n\nС уважением,\nПользователь приложения МИМИК`
+          : `Hello Dmitry!\n\nI use the MIMIC trainer and would like to share anonymous data from my training sessions to improve the project and for scientific research.\n\nThe anonymized statistics file (${generatedFilename}) has just been downloaded to my device. Please ensure it is attached to this email.\n\nI understand that this data may be used for scientific publications in an anonymized form.\n\nBest regards,\nA MIMIC App User`
+        );
+
+        window.location.href = `mailto:mityasky@ya.ru?subject=${subject}&body=${body}`;
+        
+        closeConsentModal();
+
+      } catch (err) {
+        console.error('Anonymous export error:', err);
+        alert('❌ Ошибка при подготовке данных. Попробуйте позже.');
+      } finally {
+        consentSend.disabled = false;
+        consentSend.innerHTML = translations[currentLang].consentSend || '✉️ Открыть почтовый клиент';
+      }
     });
   }
 });
