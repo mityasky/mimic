@@ -14,7 +14,7 @@
   8. МОДАЛКИ: Обратная связь, Поддержка (Donate), Онбординг
   9. МОДАЛКИ ИГРОВЫХ РЕЖИМОВ: Дуэт, Эмоциональная дуэль, Временная петля
   10. МОДАЛКА: Расширенная статистика и Цифровой портрет
-  11. МОДАЛКИ: Эмоциональный дневник и История дневника
+  11. МОДАЛКИ: Эмоциональный дневник, История дневника и Отправка данных разработчику
 -->
 <!-- ============================================================================ -->
 
@@ -203,6 +203,7 @@
 		<li data-i18n="newsItem13"></li>
 		<li data-i18n="newsItem14"></li>
 		<li data-i18n="newsItem15"></li>
+		<li data-i18n="newsItem16"></li>
       </ul>
 
       <h4 data-i18n="newsPlanned">В разработке</h4>
@@ -706,6 +707,7 @@
       <!-- Второй ряд -->
       <button class="btn-save-progress" id="save-progress-btn" data-i18n="saveProgress">💾 Сохранить историю</button>
       <button class="btn-clear-progress" id="clear-progress-btn" data-i18n="clearProgress">🗑️ Очистить историю</button>
+	  <button class="btn-share-progress" id="share-progress-btn" data-i18n="shareProgressBtn" style="grid-column: 1 / -1;">📤 Поделиться анонимными данными для науки</button>
     </div>
   </div>
 </div>
@@ -1270,6 +1272,44 @@
       Пока здесь пусто. Записи появятся после тренировок.
     </div>
     <button id="diary-clear-btn" class="diary-clear-btn hidden" data-i18n="diaryClearBtn">🗑️ Очистить дневник</button>
+  </div>
+</div>
+
+<!-- ===== МОДАЛЬНОЕ ОКНО СОГЛАСИЯ НА ОТПРАВКУ ДАННЫХ ===== -->
+<div id="consent-modal" class="modal-overlay" hidden>
+  <div class="modal-content consent-modal-content">
+    <button class="modal-close" id="consent-close" aria-label="Закрыть">&times;</button>
+    
+    <h2 data-i18n="consentTitle">📜 Согласие на отправку данных</h2>
+    
+    <div class="consent-text">
+      <p data-i18n-html="consentParagraph1">Нажимая «Отправить», вы соглашаетесь с тем, что <strong>обезличенные данные</strong> ваших тренировок (точность, время, ошибки) будут отправлены разработчику на адрес mityasky@ya.ru.</p>
+      <p data-i18n-html="consentParagraph2">Эти данные используются исключительно в научных целях для улучшения точности распознавания и развития проекта «МИМИК». Результаты могут быть опубликованы в открытом доступе в виде обобщенной статистики, <strong>не содержащей персональной информации</strong>.</p>
+      <p class="consent-note" data-i18n-html="consentNote">🔒 Ваш эмоциональный дневник и личные записи <strong>не включаются</strong> в этот отчет.</p>
+      
+      <!-- Блок демографических данных (ОБЯЗАТЕЛЬНЫЕ ПОЛЯ) -->
+      <div class="consent-demographics">
+        <div class="demographic-field">
+          <label for="user-gender" data-i18n="demographicsGender">Пол: *</label>
+          <select id="user-gender" class="demographic-select" required>
+            <option value="" disabled selected data-i18n="selectGender">Выберите пол</option>
+            <option value="male" data-i18n="genderMale">Мужской</option>
+            <option value="female" data-i18n="genderFemale">Женский</option>
+          </select>
+        </div>
+        <div class="demographic-field">
+          <label for="user-age" data-i18n="demographicsAge">Возраст (лет): *</label>
+          <input type="number" id="user-age" class="demographic-input" min="1" max="120" required placeholder="10">
+        </div>
+      </div>
+
+      <p class="consent-instruction" data-i18n-html="consentInstruction">📎 <strong>Заполните обязательные поля выше.</strong> Файл с данными будет скачан на ваше устройство при нажатии кнопки «Открыть почтовый клиент». <strong>Пожалуйста, прикрепите его к письму</strong>.</p>
+    </div>
+
+    <div class="consent-actions">
+      <button class="btn-cancel" id="consent-cancel" data-i18n="consentCancel">Отмена</button>
+      <button class="btn-send-email" id="consent-send" data-i18n="consentSend">✉️ Открыть почтовый клиент</button>
+    </div>
   </div>
 </div>
 
